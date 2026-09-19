@@ -49,6 +49,7 @@ cd win-cua
 - **OS**: Windows 10 or Windows 11 (Windows 11 recommended) with WSL2.
 - **WSL Interop**: Enabled (`/proc/sys/fs/binfmt_misc/WSLInterop` present; enabled by default in WSL).
 - **Windows Host**: **Zero installation required**. No Python, Go, Node.js, or background daemons needed on the Windows side.
+- **PowerShell Engine** *(optional)*: If PowerShell 7 (`pwsh`) is installed on Windows, win-cua uses it automatically — ~40% faster per invocation (measured ~580ms vs ~995ms). Falls back to built-in Windows PowerShell 5.1 otherwise. Override with the `WIN_CUA_PS` environment variable.
 
 ---
 
@@ -137,7 +138,7 @@ pi (WSL) ──bash──▶ scripts/run.sh ──interop──▶ powershell.ex
                                               Windows Desktop Apps (Zero Install)
 ```
 
-1. **WSL Interop**: WSL bash calls `run.sh`, which converts script paths into Windows UNC paths (`\\wsl.localhost\<distro>\...`) using `wslpath -w`.
+1. **WSL Interop**: WSL bash calls `run.sh`, which converts script paths into Windows UNC paths (`\\wsl.localhost\<distro>\...`) using `wslpath -w`. `run.sh` auto-selects the PowerShell engine: `pwsh.exe` (7+) when available, otherwise `powershell.exe` (5.1); override with `WIN_CUA_PS`.
 2. **Native Host Execution**: PowerShell runs directly via `powershell.exe -NoProfile -ExecutionPolicy Bypass -File <UNC_path>`. No scripts or binaries need to be copied onto the Windows filesystem.
 3. **Encoding & Compatibility**:
    - Standard output is explicitly set to UTF-8 (`[Console]::OutputEncoding = [System.Text.Encoding]::UTF8`), ensuring flawless handling of non-ASCII and Chinese window titles.
@@ -158,13 +159,14 @@ Tested and verified on Windows 11 (Build 26100) with WSL2:
 - ✅ **Background Capture**: `PrintWindow` captures background and obscured windows cleanly without activation (verified with Chromium-based interfaces and native desktop apps).
 - ✅ **UTF-8 & CJK Support**: Chinese window titles and UI element names correctly parsed and output without encoding corruption.
 - ✅ **Process Resolution**: `AutomationElement.ProcessNameProperty` can return null on certain Windows configurations; resolved reliably using `ProcessIdProperty` paired with `Get-Process`.
+- ✅ **PowerShell 7 Acceleration**: `pwsh` 7.6.6 verified — UIA, WinForms, and P/Invoke all work; per-invocation latency drops from ~995ms to ~580ms (~40% faster). Windows PowerShell 5.1 remains a fully supported fallback.
 - ⚠️ **Model Multimodality Note**: When paired with text-only LLMs (e.g., glm-5.3), UI perception relies primarily on UIA text trees; screenshots are saved to `/mnt/c/...` as visual artifacts for user inspection.
 
 ---
 
 ## Limitations
 
-- **Process Cold-Start**: Spawning `powershell.exe` per command incurs an overhead of ~1–2 seconds.
+- **Process Cold-Start**: Each command spawns a PowerShell process (~0.6s with pwsh 7, ~1s with Windows PowerShell 5.1).
 - **Sparse UIA Trees**: Applications built with Electron, custom canvas rendering, or game engines may expose minimal accessibility elements. In such cases, perception falls back to screenshots and L3 physical input (subject to user confirmation).
 - **Locked Screen / Headless**: When Windows is locked or RDP is disconnected, screenshots render black. L1 UIA queries still function, but visual inspection is unavailable.
 

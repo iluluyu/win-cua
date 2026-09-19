@@ -25,9 +25,22 @@ fi
 WIN_PATH="$(wslpath -w "$PS1_FILE")"
 TIMEOUT="${WIN_CUA_TIMEOUT:-90}"
 
-# powershell.exe inherits a UNC cwd from WSL; some cmdlets warn about it.
+# Engine selection: pwsh 7 is ~40% faster per invocation (verified: ~580ms vs ~995ms).
+# Preference: $WIN_CUA_PS env > pwsh.exe on PATH > known install path > powershell.exe (5.1).
+PS_ENGINE="${WIN_CUA_PS:-}"
+if [[ -z "$PS_ENGINE" ]]; then
+    if command -v pwsh.exe >/dev/null 2>&1; then
+        PS_ENGINE="pwsh.exe"
+    elif [[ -x "/mnt/c/Program Files/PowerShell/7/pwsh.exe" ]]; then
+        PS_ENGINE="/mnt/c/Program Files/PowerShell/7/pwsh.exe"
+    else
+        PS_ENGINE="powershell.exe"
+    fi
+fi
+
+# powershell.exe/pwsh.exe inherits a UNC cwd from WSL; some cmdlets warn about it.
 # Harmless, but we silence it by not relying on cwd anywhere.
-OUT="$(timeout "$TIMEOUT" powershell.exe -NoProfile -ExecutionPolicy Bypass \
+OUT="$(timeout "$TIMEOUT" "$PS_ENGINE" -NoProfile -ExecutionPolicy Bypass \
       -File "$WIN_PATH" "$@" 2>&1 | tr -d '\r')" || RC=$? || true
 RC="${RC:-0}"
 echo "$OUT"

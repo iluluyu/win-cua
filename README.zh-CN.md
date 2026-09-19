@@ -49,6 +49,7 @@ cd win-cua
 - **操作系统**：Windows 10 或 Windows 11（推荐 Windows 11）+ WSL2。
 - **WSL 互操作性（Interop）**：已启用（`/proc/sys/fs/binfmt_misc/WSLInterop` 存在，WSL 默认已启用）。
 - **Windows 宿主机**：**零依赖**。无需在 Windows 侧安装 Python、Go、Node.js 或任何第三方常驻服务。
+- **PowerShell 引擎**（可选）：若 Windows 侧装有 PowerShell 7（`pwsh`），win-cua 会自动优先使用 —— 单次调用提速约 40%（实测 ~580ms 对比 ~995ms）。未安装时自动回退到系统自带的 Windows PowerShell 5.1，也可通过 `WIN_CUA_PS` 环境变量手动指定。
 
 ---
 
@@ -158,13 +159,14 @@ pi (WSL) ──bash──▶ scripts/run.sh ──interop──▶ powershell.ex
 - ✅ **后台窗口截图**：通过 `PrintWindow` 成功截取被遮挡或后台运行的窗口（实测 Chromium 核心应用与原生窗口均可用），无需将窗口置顶。
 - ✅ **UTF-8 与中文支持**：中文窗口标题及控件名称正常识别解析并输出，无乱码。
 - ✅ **进程名称解析**：部分系统下 `AutomationElement.ProcessNameProperty` 返回 null，统一优化为 `ProcessIdProperty` 配合 `Get-Process` 精确获取。
+- ✅ **PowerShell 7 加速**：实测 `pwsh` 7.6.6 下 UIA、WinForms、P/Invoke 均正常工作，单次调用耗时从 ~995ms 降至 ~580ms（提速约 40%）；无 pwsh 时自动回退 Windows PowerShell 5.1，完全兼容。
 - ⚠️ **模型多模态说明**：搭配纯文本 LLM（如 glm-5.3）使用时，环境感知以 UIA 文本树为主；截图保存至 `/mnt/c/...` 路径，作为供用户查阅的证据产物。
 
 ---
 
 ## 已知限制
 
-- **冷启动开销**：每次调用 `powershell.exe` 存在约 1–2 秒的进程启动开销。
+- **冷启动开销**：每次调用需拉起一个 PowerShell 进程（pwsh 7 约 0.6 秒，Windows PowerShell 5.1 约 1 秒）。
 - **UI 树稀疏应用**：基于 Electron、自绘 Canvas 或游戏引擎开发的应用可能仅暴露极少甚至空白的无障碍树；此时感知需回退至截图，操作需回退至 L3 物理输入（需用户审批）。
 - **锁屏与无头会话**：当 Windows 处于锁屏状态或 RDP 远程桌面断开连接时，截图将返回纯黑画面（L1 UIA 仍可查询，但无法进行视觉捕获）。
 
@@ -176,7 +178,7 @@ pi (WSL) ──bash──▶ scripts/run.sh ──interop──▶ powershell.ex
 |---|---|---|
 | **架构形态** | 无状态、按需调用的 `powershell.exe` interop | Windows 侧常驻后台 MCP 服务进程 |
 | **Windows 安装成本** | **零安装**（Windows 宿主机完全无需安装任何软件） | 需在 Windows 侧安装依赖、配置运行环境与后台服务维护 |
-| **调用响应延迟** | 每次调用存在 ~1–2s 冷启动耗时 | 极低延迟（<100ms） |
+| **调用响应延迟** | 每次调用存在 ~0.6s（pwsh 7）冷启动耗时 | 极低延迟（<100ms） |
 | **焦点保护** | 严格的 L1/L2/L3 分层模型，附带 `focus untouched` 校验 | 视具体工具实现而定 |
 | **适用场景** | WSL 优先的 Agent 日常开发、个人环境、零负担开箱即用 | 高频批量自动化、企业级操作审计链、需硬件级紧急开关（kill-switch）场景 |
 
