@@ -4,7 +4,7 @@
 
 > win-cua = Windows + CUA (Computer-Use Agent)
 
-Control and inspect Windows desktop applications from inside WSL for any agent with bash access (pi, Claude Code, Codex, ...). Nothing is installed on the Windows host: everything runs through `powershell.exe` WSL interop and the UI Automation API. Background actions (L1) never steal focus or mouse; physical input (L3) is dry-run by default and always requires explicit approval.
+Control and inspect Windows desktop applications from inside WSL, for any agent with bash access. Nothing is installed on the Windows host: everything runs through `powershell.exe` WSL interop and the UI Automation API. Background actions (L1) never steal focus or mouse; physical input (L3) is dry-run by default and always requires explicit approval.
 
 ## Install
 

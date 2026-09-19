@@ -4,7 +4,7 @@
 
 > win-cua = Windows + CUA（Computer-Use Agent，计算机使用体）
 
-让运行在 WSL 中的 Agent（pi、Claude Code、Codex 等任何具备 bash 执行权限的框架）感知并操作 Windows 宿主机桌面应用。**Windows 侧零安装**：全部通过 `powershell.exe` WSL 互操作与 UI Automation API 完成。后台操作（L1）绝不抢占焦点和鼠标；物理输入（L3）默认仅演练，且必须获得用户明确批准才会执行。
+让运行在 WSL 中的任何具备 bash 执行权限的 Agent 感知并操作 Windows 宿主机桌面应用。**Windows 侧零安装**：全部通过 `powershell.exe` WSL 互操作与 UI Automation API 完成。后台操作（L1）绝不抢占焦点和鼠标；物理输入（L3）默认仅演练，且必须获得用户明确批准才会执行。
 
 ## 安装
 

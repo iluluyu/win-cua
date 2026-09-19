@@ -14,7 +14,7 @@ compatibility: WSL2 (Windows 11 recommended) with WSL interop enabled; no Window
 # win-cua — Windows Computer Use from WSL
 
 win-cua = Windows + CUA (Computer-Use Agent).
-A skill for any agent running inside WSL with bash access (pi, Claude Code, Codex... any Agent Skills compatible harness) to drive Windows applications via `powershell.exe` interop — nothing installed on Windows.
+A skill for any agent running inside WSL with bash access (any Agent Skills compatible harness) to drive Windows applications via `powershell.exe` interop — nothing installed on Windows.
 
 ## Three-layer execution model (Never steal user focus/mouse)
 - **L1 — UIA patterns (default, always try first)**: Background COM operations. Never steals focus or mouse. Reports `focus untouched: True`.
@@ -30,8 +30,8 @@ A skill for any agent running inside WSL with bash access (pi, Claude Code, Code
 
 ## Entry point & commands
 ```bash
-SKILL_DIR="<this-skill-dir>" # e.g. ~/.pi/agent/.../skills/win-cua or ~/.claude/skills/win-cua
-# Locate if unknown: find ~/.pi/agent ~/.claude ~/.agents -type d -name win-cua -path '*skills*' 2>/dev/null
+SKILL_DIR="<this-skill-dir>" # e.g. .agents/skills/win-cua (project) or ~/.agents/skills/win-cua
+# Locate if unknown: find ~ -maxdepth 5 -type d -name win-cua -path '*skills*' 2>/dev/null
 RUN="$SKILL_DIR/scripts/run.sh"
 
 # 1) Perceive (L1/L2 background, zero focus impact)
