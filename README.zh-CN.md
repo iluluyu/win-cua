@@ -15,11 +15,11 @@ pi install git:github.com/iluluyu/win-cua
 git clone https://github.com/iluluyu/win-cua ~/.pi/agent/skills/win-cua
 ```
 
-### Claude Code / Codex CLI / 其他 Agent Skills 框架
+### 任何兼容 Agent Skills 规范的框架
 ```bash
 git clone https://github.com/iluluyu/win-cua ~/win-cua
-ln -s ~/win-cua/skills/win-cua .agents/skills/win-cua     # 项目级（在项目根目录执行）
-# 或用户级：ln -s ~/win-cua/skills/win-cua ~/.claude/skills/win-cua  （~/.codex/skills、~/.agents/skills 等）
+ln -s ~/win-cua/skills/win-cua .agents/skills/win-cua    # 项目级（在项目根目录执行）
+# 或用户级：ln -s ~/win-cua/skills/win-cua ~/.agents/skills/win-cua
 ```
 
 要求 WSL2 且互操作启用（默认开启）。检测到 PowerShell 7（`pwsh`）时自动使用（单次调用快约 40%），否则回退 Windows PowerShell 5.1。
