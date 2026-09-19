@@ -1,9 +1,7 @@
-# tree.ps1 - dump the UIA control tree of a window in the BACKGROUND
-# (no activation, no focus steal; verified: foreground window unchanged).
-# Usage:
-#   tree.ps1 -Name "Notepad" [-Depth 4] [-Interactive]
-#   tree.ps1 -PidNum 1234 [-Depth 3]
-#   -Interactive shows only actionable controls (buttons, menus, edits, ...)
+# tree.ps1 - dump a window's UIA control tree in the BACKGROUND (no focus steal).
+#   tree.ps1 -Name "Notepad" [-Interactive] [-Depth 4] [-PidNum <pid>]
+#   -Interactive: show only actionable controls (buttons, menus, edits, ...).
+#                 Non-matching parents are skipped but still recursed into.
 param(
     [string]$Name,
     [int]$PidNum = 0,
@@ -15,35 +13,22 @@ param(
 $w = Find-CuaWindow -Name $Name -PidNum $PidNum
 if (-not $w) { Write-Host "WINDOW NOT FOUND"; exit 1 }
 
-$pn = (Get-Process -Id $w.Current.ProcessId -ErrorAction SilentlyContinue).ProcessName
 $before = Get-ForegroundTitle
+$pn = (Get-Process -Id $w.Current.ProcessId -ErrorAction SilentlyContinue).ProcessName
 Write-Host ("window: ""$($w.Current.Name)"" pid=$($w.Current.ProcessId) exe=$pn rect=$(Format-Rect $w.Current.BoundingRectangle)")
 
-$interactiveTypes = @(
-    'Button','MenuItem','TabItem','ListItem','Edit','Hyperlink','ComboBox',
-    'CheckBox','RadioButton','Document','DataItem','TreeItem','Slider','Spinner','Menu'
-)
-
+$actionable = @('Button','MenuItem','TabItem','ListItem','Edit','Hyperlink','ComboBox',
+                'CheckBox','RadioButton','Document','DataItem','TreeItem','Slider','Spinner','Menu')
 $walker = [System.Windows.Automation.TreeWalker]::ControlViewWalker
-$count = 0
+
 function Dump($el, $lvl) {
-    # NOTE: PS vars are case-INsensitive - never name a fn param like a script param
-    if ($lvl -gt $Depth -or $count -gt 400) { return }
+    # PS variables are case-insensitive: fn args must not shadow script params ($Depth)
+    if ($lvl -gt $Depth) { return }
     $ct = $el.Current.ControlType.ProgrammaticName.Split('.')[-1]
-    if ($Interactive) {
-        if ($interactiveTypes -notcontains $ct) { }
-        else {
-            $nm = $el.Current.Name; if ($nm.Length -gt 40) { $nm = $nm.Substring(0,40) }
-            $pats = Get-PatternNames $el
-            Write-Host ("{0}{1,-12} ""{2}"" [{3}] {4}" -f ('  ' * $lvl), $ct, $nm, $pats, (Format-Rect $el.Current.BoundingRectangle))
-            $count++
-        }
-    }
-    else {
+    if (-not $Interactive -or $actionable -contains $ct) {
         $nm = $el.Current.Name; if ($nm.Length -gt 40) { $nm = $nm.Substring(0,40) }
-        $aid = $el.Current.AutomationId
-        Write-Host ("{0}{1,-12} ""{2}"" aid={3}" -f ('  ' * $lvl), $ct, $nm, $aid)
-        $count++
+        Write-Host ("{0}{1,-12} ""{2}"" [{3}] {4}" -f ('  ' * $lvl), $ct, $nm,
+            (Get-PatternNames $el), (Format-Rect $el.Current.BoundingRectangle))
     }
     $c = $walker.GetFirstChild($el)
     while ($c) { Dump $c ($lvl + 1); $c = $walker.GetNextSibling($c) }

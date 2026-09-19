@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
 # run.sh - WSL-side entry point for win-cua PowerShell scripts.
-# Usage (from anywhere, typically the skill directory): <path-to>/run.sh <script-name> [args...]
-#   run.sh windows
-#   run.sh tree -Name Notepad -Interactive
-#   run.sh text -Name "wheeltest" -MaxChars 500
-#   run.sh act -Name Settings -Target "Dark mode" -Action toggle
-#   run.sh screenshot -Window Notepad
-#   ./run.sh geom -ListMonitors
-#   ./run.sh input -MouseClick -X 100 -Y 200   # dry run unless -ConfirmPhysical
+# Usage: run.sh <script> [args...]  e.g. run.sh tree -Name Notepad -Interactive
+# Scripts: windows tree text act screenshot geom input (input is dry-run unless -ConfirmPhysical)
 set -euo pipefail
 
 SCRIPT_NAME="${1:-help}"
@@ -25,8 +19,8 @@ fi
 WIN_PATH="$(wslpath -w "$PS1_FILE")"
 TIMEOUT="${WIN_CUA_TIMEOUT:-90}"
 
-# Engine selection: pwsh 7 is ~40% faster per invocation (verified: ~580ms vs ~995ms).
-# Preference: $WIN_CUA_PS env > pwsh.exe on PATH > known install path > powershell.exe (5.1).
+# Engine: pwsh 7 preferred (~40% faster, verified ~580ms vs ~995ms); falls back to 5.1.
+# Override with WIN_CUA_PS. UIA/WinForms/PInvoke verified on both engines.
 PS_ENGINE="${WIN_CUA_PS:-}"
 if [[ -z "$PS_ENGINE" ]]; then
     if command -v pwsh.exe >/dev/null 2>&1; then
