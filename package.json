@@ -1,0 +1,23 @@
+{
+  "name": "win-cua",
+  "version": "0.1.0",
+  "description": "pi skill: control and inspect Windows desktop applications from WSL via UI Automation - zero install on the Windows side, background L1 actions never steal focus",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-skill",
+    "skill",
+    "windows",
+    "wsl",
+    "computer-use",
+    "ui-automation"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iluluyu/win-cua.git"
+  },
+  "pi": {
+    "skills": ["./skills/win-cua"]
+  }
+}
