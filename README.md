@@ -18,7 +18,8 @@ git clone https://github.com/iluluyu/win-cua ~/.pi/agent/skills/win-cua
 ### Claude Code / Codex CLI / other Agent Skills harnesses
 ```bash
 git clone https://github.com/iluluyu/win-cua ~/win-cua
-ln -s ~/win-cua/skills/win-cua ~/.claude/skills/win-cua   # or ~/.codex/skills, ~/.agents/skills, ...
+ln -s ~/win-cua/skills/win-cua .agents/skills/win-cua     # project-level (run inside your project)
+# or user-level: ln -s ~/win-cua/skills/win-cua ~/.claude/skills/win-cua  (~/.codex/skills, ~/.agents/skills, ...)
 ```
 
 Requires WSL2 with interop enabled (default). PowerShell 7 (`pwsh`) is used automatically when available (~40% faster per call); falls back to Windows PowerShell 5.1.
