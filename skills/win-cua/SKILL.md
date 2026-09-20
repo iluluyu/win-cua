@@ -7,7 +7,6 @@ description: >-
   "automate that Windows GUI", "computer use", "win-cua". Zero-install: works through
   powershell.exe WSL interop. Layer-1 UIA actions run in the background and do NOT
   steal the user's focus or mouse.
-license: MIT
 compatibility: WSL2 (Windows 11 recommended) with WSL interop enabled; no Windows-side installation required
 ---
 
@@ -36,22 +35,27 @@ RUN="$SKILL_DIR/scripts/run.sh"
 
 # 1) Perceive (L1/L2 background, zero focus impact)
 "$RUN" windows                                    # list open windows (pid/exe/title/rect)
-"$RUN" tree -Name "Notepad" -Interactive          # actionable controls (-Depth 6 for full)
+"$RUN" tree -Name "Notepad" -Interactive          # actionable controls (-Depth 6 goes deeper; default 4)
 "$RUN" text -Name "Notepad" -MaxChars 3000        # read document/field text
-"$RUN" screenshot -Window "Notepad"               # background capture (-All for desktop)
-"$RUN" geom -ListMonitors                         # geometry (-Move -Name X -X 100 -Y 100 / -Minimize)
+"$RUN" screenshot -Window "Notepad"               # background capture (-All desktop / -Region "x,y,w,h" / -Out <path>)
+"$RUN" geom -ListMonitors                         # geometry (-Move -X/-Y/-W/-H / -Minimize / -Restore)
 
-# 2) Act (L1 background)
+# 2) Act (L1 background). Actions: invoke|toggle|expand|collapse|select|setvalue|close;
+#    -ControlType <type> (e.g. Button) narrows the target search.
 "$RUN" act -Name "Notepad" -Target "File" -Action invoke
 "$RUN" act -Name "Settings" -Target "Dark mode" -Action toggle
 "$RUN" act -Name "Editor" -Target "Text Editor" -Action setvalue -Value "hi"
 
 # 3) Verify: re-run tree/text after acting; UIA state is truth.
-# L3 (last resort, explicit approval required): "$RUN" input -MouseClick -X 100 -Y 200 -ConfirmPhysical
+# L3 (last resort, explicit approval required; dry-run until -ConfirmPhysical):
+#   "$RUN" input -MouseClick -X 100 -Y 200 -ConfirmPhysical   # -Keys uses SendKeys syntax, e.g. "^s"
 ```
 
 ## Practical notes
-- Ambiguous `-Name` prints candidates → use `-PidNum` from `windows` output instead.
+- Ambiguous `-Name` prints candidates → use `-PidNum` from `windows` output instead
+  (accepted by all window-targeting commands: act/tree/text/geom/screenshot).
 - Sparse accessibility trees (Electron/Canvas/games) → fall back to screenshot + L3 (ask approval).
 - Chinese window titles work (UTF-8 handled automatically).
-- Check `focus untouched: True` flag in output; if False for L1, stop and investigate.
+- Check `focus untouched: True` in output; if False for an L1 action, stop and investigate.
+  (`windows` prints a `foreground:` line instead; `geom -Restore` is the one L2 action that
+  activates the window on purpose — it reports False by design.)

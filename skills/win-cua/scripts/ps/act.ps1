@@ -42,28 +42,22 @@ if ($ControlType) {
 
 $all = $w.FindAll($scope, $cond)
 $hits = New-Object System.Collections.ArrayList
-foreach ($e in $all) {
-    if ($e.Current.Name -like "*$Target*") { [void]$hits.Add($e) }
-}
-if ($hits.Count -eq 0) { Write-Host "TARGET NOT FOUND: ""$Target"" (run tree.ps1 to see control names)"; exit 1 }
-if ($hits.Count -gt 1) {
-    Write-Host "AMBIGUOUS TARGET: $($hits.Count) matches for ""$Target"":"
-    foreach ($h in $hits) {
-        Write-Host ("  {0} ""{1}"" [{2}]" -f $h.Current.ControlType.ProgrammaticName.Split(':')[-1], $h.Current.Name, (Get-PatternNames $h))
+if ($Action -ne 'close') {
+    foreach ($e in $all) {
+        if ($e.Current.Name -like "*$Target*") { [void]$hits.Add($e) }
     }
-    exit 1
-}
-
-$el = $hits[0]
-$ctName = $el.Current.ControlType.ProgrammaticName.Split('.')[-1]
-Write-Host ("target: $ctName ""$($el.Current.Name)"" patterns=[$(Get-PatternNames $el)]")
-
-function Try-Pattern($el, $patternClass, $op) {
-    if ($el.GetCurrentPattern($patternClass)) {
-        & $op
-        return $true
+    if ($hits.Count -eq 0) { Write-Host "TARGET NOT FOUND: ""$Target"" (run tree.ps1 to see control names)"; exit 1 }
+    if ($hits.Count -gt 1) {
+        Write-Host "AMBIGUOUS TARGET: $($hits.Count) matches for ""$Target"":"
+        foreach ($h in $hits) {
+            Write-Host ("  {0} ""{1}"" [{2}]" -f $h.Current.ControlType.ProgrammaticName.Split('.')[-1], $h.Current.Name, (Get-PatternNames $h))
+        }
+        exit 1
     }
-    return $false
+
+    $el = $hits[0]
+    $ctName = $el.Current.ControlType.ProgrammaticName.Split('.')[-1]
+    Write-Host ("target: $ctName ""$($el.Current.Name)"" patterns=[$(Get-PatternNames $el)]")
 }
 
 switch ($Action) {

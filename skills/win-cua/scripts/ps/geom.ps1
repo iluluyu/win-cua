@@ -5,7 +5,7 @@
 #   geom.ps1 -Restore -Name "Notepad"    (NOTE: restore ACTIVATES the window)
 param(
     [switch]$ListMonitors,
-    [switch]$Move, [string]$Name, [int]$X = -1, [int]$Y = -1, [int]$W = -1, [int]$H = -1,
+    [switch]$Move, [string]$Name, [int]$PidNum = 0, [int]$X = -1, [int]$Y = -1, [int]$W = -1, [int]$H = -1,
     [switch]$Minimize, [switch]$Restore
 )
 . "$PSScriptRoot\common.ps1"
@@ -19,7 +19,7 @@ if ($ListMonitors) {
     exit 0
 }
 
-$w = Find-CuaWindow -Name $Name
+$w = Find-CuaWindow -Name $Name -PidNum $PidNum
 if (-not $w) { Write-Host "WINDOW NOT FOUND"; exit 1 }
 $h = [IntPtr]$w.Current.NativeWindowHandle
 $before = Get-ForegroundTitle

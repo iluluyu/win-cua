@@ -9,7 +9,8 @@
 #   input.ps1 -MouseClick -X 100 -Y 200 [-Button right] [-Double] -ConfirmPhysical
 #   input.ps1 -MouseMove -X 100 -Y 200 -ConfirmPhysical
 #   input.ps1 -TypeText "hello world" -ConfirmPhysical
-#   input.ps1 -Keys "ctrl+s" -ConfirmPhysical
+#   input.ps1 -Keys "^s" -ConfirmPhysical
+#   -TypeText/-Keys use SendKeys syntax: + ^ % ~ ( ) { } [ ] are special chars.
 param(
     [switch]$MouseClick, [switch]$MouseMove, [switch]$TypeText, [switch]$Keys,
     [int]$X = -1, [int]$Y = -1,
@@ -26,9 +27,9 @@ using System.Runtime.InteropServices;
 public class WinCuaInput {
     [StructLayout(LayoutKind.Sequential)] public struct INPUT { public uint type; public MOUSEINPUT mi; }
     [StructLayout(LayoutKind.Sequential)] public struct MOUSEINPUT { public int dx, dy; public uint mouseData, dwFlags, time; public IntPtr extra; }
-    public const uint MOUSEEVENTF_MOVE = 0x0001, MOUSEEVENTF_LEFTDOWN = 0x0002, MOUSEEVENTF_LEFTUP = 0x0004,
+    public const uint MOUSEEVENTF_LEFTDOWN = 0x0002, MOUSEEVENTF_LEFTUP = 0x0004,
         MOUSEEVENTF_RIGHTDOWN = 0x0008, MOUSEEVENTF_RIGHTUP = 0x0010, MOUSEEVENTF_MIDDLEDOWN = 0x0020,
-        MOUSEEVENTF_MIDDLEUP = 0x0040, MOUSEEVENTF_ABSOLUTE = 0x8000;
+        MOUSEEVENTF_MIDDLEUP = 0x0040;
     [DllImport("user32.dll")] public static extern uint SendInput(uint n, INPUT[] inputs, int size);
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
 }

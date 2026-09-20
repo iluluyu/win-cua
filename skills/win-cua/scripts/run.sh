@@ -7,12 +7,17 @@ set -euo pipefail
 SCRIPT_NAME="${1:-help}"
 [[ $# -gt 0 ]] && shift
 
+if [[ ! "$SCRIPT_NAME" =~ ^[a-z]+$ ]]; then
+    echo "win-cua: invalid script name '$SCRIPT_NAME'"
+    exit 1
+fi
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PS1_FILE="$REPO_DIR/scripts/ps/${SCRIPT_NAME}.ps1"
 
 if [[ ! -f "$PS1_FILE" ]]; then
     echo "win-cua: unknown script '$SCRIPT_NAME'"
-    echo "available: $(ls "$REPO_DIR/scripts/ps/" | sed 's/\.ps1$//' | tr '\n' ' ')"
+    echo "available: $(ls "$REPO_DIR/scripts/ps/" | sed 's/\.ps1$//' | grep -v '^common$' | tr '\n' ' ')"
     exit 1
 fi
 

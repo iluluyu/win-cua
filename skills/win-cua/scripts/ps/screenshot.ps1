@@ -6,6 +6,7 @@
 # Prints "SAVED: <windows-path>" on success. run.sh converts it to a WSL path.
 param(
     [string]$Window,
+    [int]$PidNum = 0,
     [switch]$All,
     [string]$Region,
     [string]$Out
@@ -22,7 +23,7 @@ if ($Out -notmatch '^[A-Za-z]:') { Write-Host "ERROR: -Out must be a Windows pat
 $before = Get-ForegroundTitle
 
 if ($Window) {
-    $w = Find-CuaWindow -Name $Window
+    $w = Find-CuaWindow -Name $Window -PidNum $PidNum
     if (-not $w) { Write-Host "WINDOW NOT FOUND"; exit 1 }
     $h = [IntPtr]$w.Current.NativeWindowHandle
     if ($h -eq [IntPtr]::Zero) { Write-Host "ERROR: no native window handle"; exit 1 }

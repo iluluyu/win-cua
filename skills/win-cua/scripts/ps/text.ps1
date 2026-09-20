@@ -21,7 +21,7 @@ $docs = $w.FindAll([System.Windows.Automation.TreeScope]::Descendants, $tpCond)
 $i = 0
 foreach ($d in $docs) {
     if ($i -ge 3) { break }
-    $ct = $d.Current.ControlType.ProgrammaticName.Split(':')[-1]
+    $ct = $d.Current.ControlType.ProgrammaticName.Split('.')[-1]
     $tp = $d.GetCurrentPattern([System.Windows.Automation.TextPattern]::Pattern)
     $txt = $tp.DocumentRange.GetText(-1)
     if ($txt.Length -gt $MaxChars) { $txt = $txt.Substring(0, $MaxChars) + " ...[truncated, total $($txt.Length) chars shown $MaxChars]" }

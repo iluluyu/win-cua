@@ -31,11 +31,10 @@ function Get-ForegroundTitle {
 # Find a top-level UIA window. Params (any one):
 #   -Name <string>  fuzzy match on window title (case-insensitive substring)
 #   -PidNum <int>   match by process id
-#   -Exe <string>   match by process exe base name (first main window)
 # Returns the AutomationElement, or $null. On ambiguous -Name matches,
 # prints candidates and throws so the caller stops.
 function Find-CuaWindow {
-    param([string]$Name, [int]$PidNum = 0, [string]$Exe)
+    param([string]$Name, [int]$PidNum = 0)
     $root = [System.Windows.Automation.AutomationElement]::RootElement
     $cond = New-Object System.Windows.Automation.PropertyCondition(
         [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
@@ -49,10 +48,6 @@ function Find-CuaWindow {
         if ($Name) { if ($title -notlike "*$Name*") { continue } }
         if ($PidNum -gt 0) {
             if ($w.Current.ProcessId -ne $PidNum) { continue }
-        }
-        if ($Exe) {
-            $pn = (Get-Process -Id $w.Current.ProcessId -ErrorAction SilentlyContinue).ProcessName
-            if ($pn -and $pn -notlike "*$Exe*") { continue }
         }
         [void]$candidates.Add($w)
     }
@@ -69,12 +64,12 @@ function Find-CuaWindow {
     $candidates[0]
 }
 
-# Pretty pattern names supported by an element, e.g. "Invoke,Value"
+# Pretty pattern names supported by an element, e.g. "InvokePattern,ValuePattern"
 # ProgrammaticName looks like "InvokePatternIdentifiers.Pattern"
 function Get-PatternNames {
     param($Element)
     ($Element.GetSupportedPatterns() | ForEach-Object {
-        $_.ProgrammaticName -replace 'Identifiers\.Pattern$','' -replace 'Pattern$','' -replace '^.*\.',''
+        $_.ProgrammaticName -replace 'PatternIdentifiers\.Pattern$','Pattern' -replace '^.*\.',''
     }) -join ','
 }
 
